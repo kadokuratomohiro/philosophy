@@ -1,0 +1,148 @@
+# 共通の制約を定義
+anchors:
+  python_constraints: &python_constraints
+    - 'PEP 8スタイルガイドに従うこと'
+    - 'type hintを使用すること'
+    - '非同期処理にはasyncio/aioを使用すること'
+    - 'ユニットテストを作成すること（カバレッジ80%以上）'
+    - 'パフォーマンス最適化（非同期処理、キャッシュなど）を行うこと'
+    - '自然言語処理ライブラリ（spaCy/NLTK）を使用すること'
+    - '論理推論エンジンを実装すること'
+
+  next_constraints: &next_constraints
+    - 'Next.js 13以上を使用すること'
+    - 'TypeScriptを使用すること'
+    - 'Server ComponentsとClient Componentsを適切に使い分けること'
+    - 'レスポンシブデザインを実装すること'
+    - 'SEO対策を実装すること'
+    - 'ダークモード/ライトモードに対応すること'
+    - 'アクセシビリティガイドラインに準拠すること'
+
+  security_constraints: &security_constraints
+    - 'HTTPS通信を強制すること'
+    - 'OAuth2.0による認証を実装すること'
+    - 'データの暗号化（転送中および保存時）を行うこと'
+    - 'OWASP Top 10に対応すること'
+    - 'CSRFトークンを実装すること'
+
+rules:
+  # バックエンド規則
+  '^backend/.*\.py$':
+    - *python_constraints
+    - *security_constraints
+    - 'main.py': |
+        FastAPIアプリケーションの初期化
+        自然言語処理エンジンの初期化
+        論理推論エンジンの初期化
+        APIルーターの登録
+        エラーハンドリングの実装
+        CORSミドルウェアの設定
+
+    - '^backend/app/api/logic/.*\.py$':
+      - 'router.py': |
+          依存:
+            - services.logic_service
+            - schemas.proposition
+            - core.nlp
+            - core.inference
+          エンドポイント:
+            - POST /propositions/analyze
+            - GET /propositions/list
+            - POST /propositions/validate
+            - POST /experiments/generate
+          クラス:
+            - PropositionAnalyzer:
+                - analyze_proposition(text: str) -> Analysis
+                - extract_concepts(text: str) -> List[Concept]
+                - validate_logic(analysis: Analysis) -> ValidationResult
+            - ConceptMapper:
+                - create_concept_map(concepts: List[Concept]) -> ConceptMap
+                - find_related_concepts(concept: Concept) -> List[Concept]
+            - ExperimentGenerator:
+                - generate_thought_experiment(proposition: str) -> Experiment
+                - evaluate_experiment(experiment: Experiment) -> Evaluation
+
+  # フロントエンド規則
+  '^frontend/.*\.(ts|tsx)$':
+    - *next_constraints
+    - 'app/layout.tsx': |
+        依存:
+          - components/Layout
+          - contexts/ThemeContext
+          - styles/globals.css
+        機能:
+          - RootLayoutの定義
+          - メタデータの設定
+          - テーマプロバイダーの設定
+
+    - 'app/proposition/page.tsx': |
+        依存:
+          - components/PropositionInput
+          - components/AnalysisViewer
+          - services/api/logic
+        機能:
+          - 命題入力フォーム
+          - 解析結果表示
+          - Server-side Rendering
+
+    - 'components/PropositionInput.tsx': |
+        依存:
+          - services/api/logic
+          - types/Proposition
+        機能:
+          - 命題入力フォーム
+          - マルチ命題対応
+          - リアルタイムバリデーション
+
+    - 'services/api/logic.ts': |
+        依存:
+          - types/Proposition
+          - types/Analysis
+          - utils/api
+        関数:
+          - analyzeProposition(text: string): Promise<Analysis>
+          - validateLogic(analysis: Analysis): Promise<ValidationResult>
+          - generateExperiment(proposition: string): Promise<Experiment>
+
+    - 'types/Proposition.ts': |
+        インターフェース:
+          - Proposition
+          - Analysis
+          - Concept
+          - LogicStructure
+          - Experiment
+          - ValidationResult
+
+データ連携:
+  backend_to_frontend:
+    - 'logic.ts -> PropositionInput.tsx':
+        - 解析結果データ
+        - バリデーション結果
+    - 'concepts.ts -> ConceptMap.tsx':
+        - 概念マップデータ
+        - 関連概念情報
+    - 'experiments.ts -> ExperimentViewer.tsx':
+        - 思考実験データ
+        - 評価結果
+
+non_functional_requirements:
+  performance:
+    - '解析処理の応答時間1秒以内'
+    - 'メモリ使用の最適化'
+    - '同時実行ユーザー数100人以上対応'
+  scalability:
+    - '水平スケーリング対応'
+    - 'キャッシュ戦略の実装'
+    - 'データベースのシャーディング対応'
+  reliability:
+    - '99.9%以上の可用性'
+    - '自動バックアップ'
+    - 'エラー復旧機能'
+  accessibility:
+    - 'WCAG 2.1準拠'
+    - 'キーボード操作対応'
+    - 'スクリーンリーダー対応'
+  security:
+    - 'データ暗号化'
+    - 'アクセス制御'
+    - 'セキュリティ監査ログ'
